@@ -1,0 +1,23 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: banana-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: banana_game
+      MYSQL_USER: banana
+      MYSQL_PASSWORD: banana_dev_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - banana_mysql_data:/var/lib/mysql
+      - ./server/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-ubanana", "-pbanana_dev_pass"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  banana_mysql_data:

@@ -1,0 +1,40 @@
+-- Banana Game MySQL schema
+CREATE DATABASE IF NOT EXISTS banana_game
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE banana_game;
+
+CREATE TABLE IF NOT EXISTS users (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  score INT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS game_rounds (
+  id CHAR(36) PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  question_url TEXT NOT NULL,
+  solution VARCHAR(32) NOT NULL,
+  hint_level TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  answered TINYINT(1) NOT NULL DEFAULT 0,
+  correct TINYINT(1) NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  answered_at TIMESTAMP NULL,
+  CONSTRAINT fk_rounds_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_rounds_user (user_id),
+  INDEX idx_rounds_open (user_id, answered)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS score_events (
+  id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED NOT NULL,
+  round_id CHAR(36) NOT NULL,
+  points INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_events_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT fk_events_round FOREIGN KEY (round_id) REFERENCES game_rounds(id) ON DELETE CASCADE,
+  INDEX idx_events_user (user_id)
+) ENGINE=InnoDB;
