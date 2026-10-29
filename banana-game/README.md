@@ -6,7 +6,7 @@ College full-stack game: register, login, solve Banana API puzzles, use progress
 
 - **Frontend:** React + Vite (`client/`)
 - **Backend:** Node.js + Express (`server/`)
-- **Database:** MySQL 8 (`server/sql/schema.sql`, optional `docker-compose.yml`)
+- **Database:** local MySQL 8 (`server/sql/schema.sql`)
 
 ## Features
 
@@ -38,30 +38,22 @@ Max 3 hints per round.
 
 ## Setup
 
-### 1. MySQL
+### 1. Local MySQL
 
-**Option A — local MySQL already running**
+Install and start MySQL on your machine, then create the database (adjust user/password as needed):
 
 ```bash
-# create DB/user (example)
 mysql -u root -p -e "
-CREATE DATABASE IF NOT EXISTS banana_game CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'banana'@'%' IDENTIFIED BY 'banana_dev_pass';
-GRANT ALL ON banana_game.* TO 'banana'@'%';
-FLUSH PRIVILEGES;"
+CREATE DATABASE IF NOT EXISTS banana_game CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
-**Option B — Docker Compose**
-
-```bash
-docker compose up -d
-```
+Put your MySQL credentials in `server/.env` (copy from `.env.example` and set `MYSQL_USER` / `MYSQL_PASSWORD`).
 
 ### 2. Server
 
 ```bash
 cd server
-cp .env.example .env   # edit if needed
+cp .env.example .env   # set MYSQL_* and JWT_SECRET
 npm install
 npm run db:init
 npm run dev            # http://localhost:3001
@@ -83,8 +75,8 @@ npm run dev            # http://localhost:5173  (proxies /api → :3001)
 | `JWT_SECRET` | JWT signing secret | long random string |
 | `MYSQL_HOST` | MySQL host | `127.0.0.1` |
 | `MYSQL_PORT` | MySQL port | `3306` |
-| `MYSQL_USER` | DB user | `banana` |
-| `MYSQL_PASSWORD` | DB password | `banana_dev_pass` |
+| `MYSQL_USER` | DB user | your local MySQL user |
+| `MYSQL_PASSWORD` | DB password | your local MySQL password |
 | `MYSQL_DATABASE` | DB name | `banana_game` |
 | `BANANA_API_URL` | External puzzle API | `https://marcconrad.com/uob/banana/api.php` |
 | `CLIENT_ORIGIN` | CORS origin | `http://localhost:5173` |
@@ -112,7 +104,6 @@ banana-game/
     src/index.js          Express entry
     src/routes/           auth, game, scoreboard
     src/db/               mysql2 pool + init
-  docker-compose.yml      MySQL 8 service
   README.md
 ```
 
@@ -120,3 +111,4 @@ banana-game/
 
 - Solution values stay on the server until a wrong answer (or you never send them on start/hint).
 - Prefer HTTPS Banana API URL (HTTP redirects to HTTPS).
+- Do not commit `server/.env` — keep real passwords local only.
